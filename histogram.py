@@ -47,3 +47,4 @@ def hist2d_plt(data_frame, attr1, attr2, bins):
     plt.ylabel("Longitude", fontsize=14)
     plt.title("hist2d", fontsize=17)
     plt.show()
+

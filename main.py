@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     print('========= plot all graphs')
     multiple_graphs = lambda gr: plt.plot(gr['longitude'], gr['latitude'])
-    #export_table.__f_on_groupby(df_all, multiple_graphs, True)
+    export_table.__f_on_groupby(df_all, multiple_graphs, True)
 
     print('========= plot X graphs:')
     graphs_names = ['17-06-13_WOB_City01_Passat_OV_loop11_lane1_130640_0.pls', '17-06-02_WOB_City01_Passat_OV_128800_0.pls']
@@ -53,4 +53,7 @@ if __name__ == "__main__":
     long_bits = round(histogram.get_bins(long_range))
     print(lat_bins, long_bits)
 
-    histogram.sub_plots(df_all, 'longitude', 'latitude', lat_bins, long_bits)
+    # histogram.sub_plots(df_all, 'longitude', 'latitude', lat_bins, long_bits)
+
+    # 2D histogram
+    histogram.hist2d_plt(df_all, 'longitude', 'latitude', lat_bins * long_bits)

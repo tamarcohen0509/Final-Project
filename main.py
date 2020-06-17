@@ -53,6 +53,7 @@ if __name__ == "__main__":
     long_bits = round(histogram.get_bins(long_range))
     print(lat_bins, long_bits)
 
+
     # histogram.sub_plots(df_all, 'longitude', 'latitude', lat_bins, long_bits)
 
     # 2D histogram

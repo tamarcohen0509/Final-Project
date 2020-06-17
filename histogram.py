@@ -41,7 +41,7 @@ def sub_plots(data_frame, attr1, attr2, bins1, bins2):
 
 def hist2d_plt(data_frame, attr1, attr2, bins):
     plt.figure(figsize = (10,8))
-    plt.hist2d(data_frame[attr1], data_frame[attr2], bins=50, cmap='gray')
+    plt.hist2d(data_frame[attr1], data_frame[attr2], bins=100, cmap='gray')
     plt.colorbar().set_label("Number of properties")
     plt.xlabel("Latitude", fontsize=14)
     plt.ylabel("Longitude", fontsize=14)

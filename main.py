@@ -54,6 +54,7 @@ if __name__ == "__main__":
     print(lat_bins, long_bits)
 
 
+
     # histogram.sub_plots(df_all, 'longitude', 'latitude', lat_bins, long_bits)
 
     # 2D histogram

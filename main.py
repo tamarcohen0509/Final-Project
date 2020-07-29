@@ -2,10 +2,12 @@ import export_table, histogram
 import pandas as pd
 import matplotlib.pyplot as plt
 
+import kde
+
 if __name__ == "__main__":
     # open HDF file
     pd.set_option('max_colwidth', 40)
-    hdf_table = pd.read_hdf("C:/Users/tamarcoh/FinalProject/HDF files/GPS traces/WOB.hdf")
+    hdf_table = pd.read_hdf("C:/Users/H&M/Documents/porject_end_degree/test_to_start/WOB.hdf")
     export_table.__p_type(hdf_table)
     #__p_data_frame(hdf_table, ['pls_name','longitude', 'latitude', 'altitude'],list(range(0,5)))
     export_table.__p_data_frame(hdf_table, ['pls_name'])
@@ -17,7 +19,7 @@ if __name__ == "__main__":
 
 
     df_all = pd.DataFrame(data=hdf_table)
-
+    """
     print('========= plot all graphs')
     multiple_graphs = lambda gr: plt.plot(gr['longitude'], gr['latitude'])
     export_table.__f_on_groupby(df_all, multiple_graphs, True)
@@ -31,8 +33,10 @@ if __name__ == "__main__":
     print('========= print the graphs longtitude and latitude values:')
     print_values = lambda gr: print(gr) if gr.name in graphs_names else 0
     export_table.__f_on_groupby(df_all, print_values)
-
-
+    """
+    print('====bandwidth=====:')
+    kde.grid(df_all)
+    """
     # ======= create histograms
     print("========= create_histogram")
 
@@ -57,3 +61,4 @@ if __name__ == "__main__":
 
     # 2D histogram
     histogram.hist2d_plt(df_all, 'longitude', 'latitude', lat_bins * long_bits)
+    """

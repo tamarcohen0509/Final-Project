@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from geopy import distance
 
-
 def get_min_point_on_axis(data_frame, axis):
     sample = (data_frame.loc[data_frame[axis].idxmin()])
     print(sample['latitude'], sample['longitude'])

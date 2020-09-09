@@ -12,10 +12,21 @@ def __get_center_point_from_trace(data_frame):
 
 # get slope - TODO check it it calculates correctly (GEO points)
 def __get_slope_between_two_points(point1, point2):
-    lat1 = point1[1]
-    long1 = point1[0]
-    lat2 = point2[1]
-    long2 = point2[0]
+    lat1 = point1[2]
+    print("lat1")
+    print(lat1)
+
+    long1 = point1[1]
+    print("long1")
+    print(long1)
+    lat2 = point2[2]
+    print("lat2")
+    print(lat2)
+    long2 = point2[1]
+    print("long2")
+    print(long2)
+
+
     slope = (long2 - long1) / (lat2 - lat1)
     return slope
 
@@ -31,21 +42,23 @@ def __get_reciprocal_slope(slope):
 def __get_y_axis_based_on_slope(point1, x_axis, slope):
     # calculate y=mx+n
     # find n
-    n = point1[0] - slope*point1[1]
+    n = point1[1] - slope*point1[2]
     # find y
     y = slope*x_axis + n
     return y
 
 
 def __plot_vert_graph(slope, point1):
+    print(point1)
     r_slope = __get_reciprocal_slope(slope)
     point2 = [0,0]
-    point2[1] = point1[1] -0.01 # latitude value
+    point2[1] = point1[2] -0.01 # latitude value
     point2[0] = __get_y_axis_based_on_slope(point1, point2[1], r_slope)
     point2 = tuple(point2)
 
-    x_values = [point1[0], point2[0]]
-    y_values = [point1[1], point2[1]]
+    x_values = [point1[1], point2[0]]
+
+    y_values = [point1[2], point2[1]]
     plt.plot(x_values, y_values, color='red')
 
 

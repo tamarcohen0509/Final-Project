@@ -2,11 +2,12 @@ import change_name
 import export_table, histogram
 import pandas as pd
 import matplotlib.pyplot as plt
+import div_section
 
 if __name__ == "__main__":
     # open HDF file
     pd.set_option('max_colwidth', 40)
-    hdf_table = pd.read_hdf("C:/Users/tamarcoh/FinalProject/HDF files/GPS traces/WOB.hdf")
+    hdf_table = pd.read_hdf("C:/Users/H&M/Documents/porject_end_degree/test_to_start/WOB.hdf")
     export_table.__p_type(hdf_table)
     #__p_data_frame(hdf_table, ['pls_name','longitude', 'latitude', 'altitude'],list(range(0,5)))
     export_table.__p_data_frame(hdf_table, ['pls_name'])
@@ -21,7 +22,7 @@ if __name__ == "__main__":
 
     print('========= plot all graphs')
     multiple_graphs = lambda gr: plt.plot(gr['longitude'], gr['latitude'])
-    # export_table.__f_on_groupby(df_all, multiple_graphs, True)
+    export_table.__f_on_groupby(df_all, multiple_graphs, True)
 
     print('========= plot X graphs:')
     graphs_names = ['17-06-13_WOB_City01_Passat_OV_loop11_lane1_130640_0.pls', '17-06-02_WOB_City01_Passat_OV_128800_0.pls']
@@ -31,7 +32,7 @@ if __name__ == "__main__":
 
     print('========= print the graphs longtitude and latitude values:')
     print_values = lambda gr: print(gr) if gr.name in graphs_names else 0
-    # export_table.__f_on_groupby(df_all, print_values)
+    export_table.__f_on_groupby(df_all, print_values)
 
 
     # ======= create histograms
@@ -67,8 +68,9 @@ if __name__ == "__main__":
     export_table.__p_data_frame(df_trace_long_lat, None)
 
     print("---> print segment")
-    df_segment = df_trace_long_lat[(df_trace_long_lat['longitude'] >= 10.7690) & (df_trace_long_lat['longitude'] <= 10.7695)
-                                    & (df_trace_long_lat.index.values >= 4878)]
+    # df_segment = df_trace_long_lat[(df_trace_long_lat['longitude'] >= 10.7690) & (df_trace_long_lat['longitude'] <= 10.7695)
+    #                                 & (df_trace_long_lat.index.values >= 4878)]
+    df_segment,df_segment_2 = div_section.__div_by_s()
     export_table.__p_data_frame(df_segment, None)
     export_table.__plot_graph(df_segment)
     print(len(df_segment.index)) # get dataframe length
@@ -83,7 +85,16 @@ if __name__ == "__main__":
     df = export_table.__extract_from_data_frame(df_segment, None, (center.index[0], center.index[0]+1))
     print(df)
     points_to_slope = export_table.__df_to_tuples(df)
+
+    print("---> points for slope")
     print(points_to_slope)
+
+    print("points_to_slope[0]")
+    print(points_to_slope[0])
+    print("points_to_slope[1]")
+    print(points_to_slope[1])
+    print("--->end points")
+
     slope = change_name.__get_slope_between_two_points(points_to_slope[0], points_to_slope[1])
     print(slope)
 

@@ -6,7 +6,9 @@ import export_table
 # get the center point (long, lat) from an input dataframe
 def __get_center_point_from_trace(data_frame):
     df_len = len((data_frame.index))
+    print("df_len", df_len)
     index_center = round(df_len/2) + data_frame.index[0]
+    print("index_center", index_center)
     return export_table.__extract_from_data_frame(data_frame, None, index_center)
 
 
@@ -36,16 +38,39 @@ def __get_y_axis_based_on_slope(point1, x_axis, slope):
     y = slope*x_axis + n
     return y
 
+def __plot_hor_graph(slope, point1):
+    x = np.linspace(point1[1] - 0.001, point1[1] + 0.001, 5)
+    n = point1[0] - (slope * point1[1])
+    y = slope * x + n
+    plt.plot(x, y, '-r', color = 'black')
 
 def __plot_vert_graph(slope, point1):
     r_slope = __get_reciprocal_slope(slope)
     point2 = [0,0]
-    point2[1] = point1[1] -0.01 # latitude value
+    # point3 = [0,0]
+    point2[1] = point1[1] -0.001 # latitude value
     point2[0] = __get_y_axis_based_on_slope(point1, point2[1], r_slope)
     point2 = tuple(point2)
 
-    x_values = [point1[0], point2[0]]
-    y_values = [point1[1], point2[1]]
-    plt.plot(x_values, y_values, color='red')
+    # point3[1] = point1[1] + 0.1  # latitude value
+    # point3[0] = __get_y_axis_based_on_slope(point1, point3[1], r_slope)
+    # point3 = tuple(point3)
+
+    # print(point2)
+
+    # y_values = [point1[0], point2[0], point3[0]]
+    # x_values = [point1[1], point2[1], point3[0]]
+
+    # y_values = [point1[0], point2[0]]
+    # x_values = [point1[1], point2[1]]
+    #
+    # print(x_values, y_values)
+
+    # plt.plot(x_values, y_values, color='red')
+    # plt.axline((0, 0.5), slope=0.25, color="black", linestyle=(0, (5, 5)))
+    x = np.linspace(point1[1]-0.001, point1[1]+0.001, 5)
+    n = point1[0] - (r_slope * point1[1])
+    y = r_slope * x + n
+    plt.plot(x, y, '-r')
 
 

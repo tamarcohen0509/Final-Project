@@ -22,6 +22,10 @@ def __plot_graph(data_frame, color='mediumvioletred'):
     data_frame.plot(x='longitude', y='latitude', kind='line', color=color)
     # plt.show()
 
+def __plot_data_points(latitude_list, longitude_list):
+    # plotting the points
+    plt.plot(latitude_list, longitude_list, color='steelblue', linestyle='dashed', linewidth=3,
+             marker='o', markerfacecolor='lightblue', markersize=6)
 
 def __f_on_groupby(data_frame, func, plot=False, return_val=False):
     grouped_df = data_frame.groupby('pls_name')[['latitude', 'longitude']].apply(func)
@@ -36,3 +40,7 @@ def __extract_long_lat_from_DF(data_frame):
 # output: list of tuples
 def __df_to_tuples(data_frame):
     return [tuple(r) for r in data_frame.to_numpy()]
+
+
+def __df_column_to_list(df_segment, column):
+    return df_segment[column].tolist()

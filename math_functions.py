@@ -1,7 +1,8 @@
-import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import export_table
+from scipy.interpolate import interp1d
+
 
 # get the center point (long, lat) from an input dataframe
 def __get_center_point_from_trace(data_frame):
@@ -43,6 +44,7 @@ def __plot_hor_graph(slope, point1):
     n = point1[0] - (slope * point1[1])
     y = slope * x + n
     plt.plot(x, y, '-r', color = 'black')
+    return y
 
 def __plot_vert_graph(slope, point1):
     r_slope = __get_reciprocal_slope(slope)
@@ -72,5 +74,13 @@ def __plot_vert_graph(slope, point1):
     n = point1[0] - (r_slope * point1[1])
     y = r_slope * x + n
     plt.plot(x, y, '-r')
+    return y
 
 
+def __get_linear_interpolation(x, y):
+    f = interp1d(x, y, fill_value="extrapolate")  # linear spline
+    return f
+
+
+def __plot_spline(x, y, func):
+    plt.plot(x, y, 'o', x, func(x), '-')    # plot data points + linear spline

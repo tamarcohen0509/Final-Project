@@ -1,4 +1,4 @@
-import change_name
+import math_functions
 import export_table, histogram
 import pandas as pd
 import matplotlib.pyplot as plt

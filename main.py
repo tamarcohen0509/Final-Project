@@ -2,6 +2,9 @@ import math_functions
 import export_table, histogram
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.spatial.ckdtree import cKDTree
+import numpy as np
+import scipy
 
 
 def process_pls (df_trace):
@@ -23,17 +26,27 @@ def process_pls (df_trace):
     return_values_dict['segment'] = df_segment
     return return_values_dict
 
+def f(x):
+    '''
 
+    :param x:
+    :return:
+    '''
+
+    # load data
 
 if __name__ == "__main__":
     # open HDF file
     pd.set_option('max_colwidth', 40)
     hdf_table = pd.read_hdf("C:/Users/tamarcoh/FinalProject/HDF files/GPS traces/WOB.hdf")
-    export_table.__p_type(hdf_table)
-    #__p_data_frame(hdf_table, ['pls_name','longitude', 'latitude', 'altitude'],list(range(0,5)))
-    export_table.__p_data_frame(hdf_table, ['pls_name'])
+    export_table.__p_type(hdf_table)  # print columns type
 
     df_all = pd.DataFrame(data=hdf_table)
+
+    pls_names_list = export_table.__df_column_to_list(df_all, 'pls_name')
+    pls_names_list = list(dict.fromkeys(pls_names_list))
+    # print(pls_names_list)
+
 
     print('========= plot all graphs')
     multiple_graphs = lambda gr: plt.plot(gr['longitude'], gr['latitude'])
@@ -51,13 +64,19 @@ if __name__ == "__main__":
 
     # plot 1 graph
     df_first_trace = pd.DataFrame(data=hdf_table)
-    df_first_trace = df_first_trace.loc[df_first_trace['pls_name'] == '17-06-13_WOB_City01_Passat_OV_loop11_lane1_130640_0.pls']
+    df_first_trace = df_first_trace.loc[df_first_trace['pls_name'] == pls_names_list[0]]
     # __plot_graph(df_first_trace)
+    export_table.__p_data_frame(df_first_trace, ['pls_name', 'longitude', 'latitude', 's'])
 
     # plot graph #2:
     # TODO delete multiple dataframes
     df_second_trace = pd.DataFrame(data=hdf_table)
-    df_second_trace = df_second_trace.loc[df_second_trace['pls_name'] == '17-06-02_WOB_City01_Passat_OV_128800_0.pls']
+    df_second_trace = df_second_trace.loc[df_second_trace['pls_name'] == pls_names_list[1]]
+
+    # plot graph #3:
+    # TODO delete multiple dataframes
+    df_third_trace = pd.DataFrame(data=hdf_table)
+    df_third_trace = df_third_trace.loc[df_third_trace['pls_name'] == pls_names_list[2]]
 
 
     ############################################
@@ -77,15 +96,27 @@ if __name__ == "__main__":
     longitude_list2 = return_values_dict2['long_lat'][1]
 
     # plot data points + linear spline
-    f = math_functions.__get_linear_interpolation(latitude_list2, longitude_list2)
-    math_functions.__plot_spline(latitude_list2, longitude_list2, f)
-    # plt.plot(x, y, 'o', xnew, f(xnew), '-')
+    interp_func = math_functions.__get_linear_interpolation(latitude_list2, longitude_list2)
+    math_functions.__plot_spline(latitude_list2, longitude_list2, interp_func)
 
+
+    #### trace3
+    return_values_dict3 = process_pls(df_third_trace)
+    latitude_list3 = return_values_dict3['long_lat'][0]
+    longitude_list3 = return_values_dict3['long_lat'][1]
+
+    # plot data points + linear spline
+    f = math_functions.__get_linear_interpolation(latitude_list3, longitude_list3)
+    # math_functions.__plot_spline(latitude_list3, longitude_list3, f)
 
     # naming the x axis
     plt.xlabel('latitude - axis')
     # naming the y axis
     plt.ylabel('longitude - axis')
+
+
+
+
 
 
 
@@ -119,4 +150,16 @@ if __name__ == "__main__":
     plt.show()
 
 
+    # print("---> interpolate values")
+    # print(type(latitude_list2), type(latitude_list2[0]))
+    # newarr = interp_func(np.arange(latitude_list2[0], latitude_list2[0]+1, 0.01))
+    #
+    # p_samples = newarr
+    # # kdt = cKDTree(np.arange(latitude_list2[0], latitude_list2[0]+1, 0.01), p_samples)
+    # kdt = cKDTree(np.c_[latitude_list2, longitude_list2])
+    # dist, idxs = kdt.query(np.c_[center_lat, center_long])
+    # print(dist)
+
+
+    # scipy.lining.norm(x - center_lat, f(x) - center_long)
 

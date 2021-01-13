@@ -26,10 +26,10 @@ def __plot_graph(data_frame, color='mediumvioletred'):
     # plt.show()
 
 
-def __plot_data_points(latitude_list, longitude_list):
+def __plot_data_points(latitude_list, longitude_list, color='steelblue', m_color='lightblue'):
     # plotting the points
-    plt.plot(latitude_list, longitude_list, color='steelblue', linestyle='dashed', linewidth=3,
-             marker='o', markerfacecolor='lightblue', markersize=6)
+    plt.plot(latitude_list, longitude_list, color=color, linestyle='dashed', linewidth=3,
+             marker='o', markerfacecolor=m_color, markersize=6)
 
 
 def __f_on_groupby(data_frame, func, plot=False, return_val=False):

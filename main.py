@@ -38,7 +38,7 @@ def f(x):
 if __name__ == "__main__":
     # open HDF file
     pd.set_option('max_colwidth', 40)
-    hdf_table = pd.read_hdf("C:/Users/tamarcoh/FinalProject/HDF files/GPS traces/WOB.hdf")
+    hdf_table = pd.read_hdf("C:/Users/H&M/Documents/porject_end_degree/test_to_start/WOB.hdf")
     export_table.__p_type(hdf_table)  # print columns type
 
     df_all = pd.DataFrame(data=hdf_table)

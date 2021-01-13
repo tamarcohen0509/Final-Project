@@ -1,17 +1,32 @@
-
+import pandas as pd
 """
 input: traces
 output: roads that are a clustering of this
         traces
+    go over every couple of traces compare and find which dots can be connected and which can't.
+    if would do this without any change would find for every dot to what traces it's related
+    would get clusters which are group of all dots that are connected.
+    the clustes aren't on the original traces it's on the common parts of the traces.
 """
 
 def create_streets(traces):
-    roads = None
-    rides_to_cluster = traces[:]
-    for road in rides_to_cluster:
-        traces = rides_to_cluster[:]
-        for trace in traces:
+    roads = pd.DataFrame()
+    rides_cluster = pd.DataFrame()
+    for trace in traces:
+        trace = trace.assign(check=False)
+        trace = trace.assign(counter=0)
+        rides_cluster = rides_cluster.append(trace)
+    rides_to_cluster = rides_cluster[:]
+
+
+    rides = pd.DataFrame()
+    for ind, road in rides_to_cluster.iterrows():
+        rides_cluster = rides_to_cluster[:]
+        for ind, trace in rides_cluster.iterrows():
+
             unattached_segments, road = check_trace_relation(road, trace)
+
+            #old_roads.append(road_old)
             rides = add_segments_to_list(trace, unattached_segments)
             rides_to_cluster.remove(trace)
             rides_to_cluster.append(rides)
@@ -45,12 +60,14 @@ a match with road
 
 def check_trace_relation(road, segment):
     width_trace = 10
-    for dot in segment:
-        index, distance = road.find_the_perfect_index(dot)
-        dot.checked = road.add_dot_to_road(width_trace, distance)
-        if dot.checked:
-            new_location = road.change_location(index, dot)
-            print(new_location)
+    for ind, dot in segment.iterrows():
+        index, distance = find_the_perfect_index(road, dot)
+        dot.check = add_dot_to_road(width_trace, distance)
+
+
+        if dot.check:
+            new_location = change_location(road, index, dot)
+            #print(new_location)
     segment_false = unchecked_segments(segment)
     return segment_false, road
 
@@ -60,17 +77,17 @@ in roas and which were not clustered yet.
 The ones that were not clustered are returned in list of indexes
 """
 def unchecked_segments(trace):
-    flag = trace[0].checked
+    flag = trace.iloc[0].check
     segment_false = []
-    for dot in trace:
-        if dot.checked != flag:
+    for ind, dot in trace.iterrows():
+        if dot.check != flag:
             index = trace.index(dot)
             if flag:
                 segment_false.append(index)
             else:
                 start_seg = segment_false[-1]
                 segment_false[-1] = (start_seg, index - 1)
-    if segment_false[-1] is not None and not tuple:
+    if segment_false and segment_false[-1] is not tuple:
         start_seg = segment_false[-1]
         segment_false[-1] = (start_seg, len(trace) - 1)
     return segment_false
@@ -81,7 +98,8 @@ def unchecked_segments(trace):
   which is closest to the place in spline 
   where the distance was measured from
 """#horizontal and vertical are regarding to the vertivcal beween dot and trace herefore not sure if need this recursive
-def find_the_perfect_index(main_trace, dot, index):
+def find_the_perfect_index(main_trace, dot):
+
     return 1, 1
     #if index + 1 < main_trace.length:
     #    if main_trace[index].dist_horizontal(dot) > main_trace[index + 1].dist_horizontal(dot):
@@ -114,17 +132,20 @@ average depending on how many traces is main road based on
 def change_location(road, index, dot):
     #counter counts how many rides
     # is this road based on
-    counter = road.index.counter
-    road.index.counter = road.index.counter + 1
+    # print(road.iloc[index])
+    # print(road.iloc[index].counter)
+
+    counter = road.iloc[index].counter
+    road.loc[index, 'counter'] = counter +1
     #wha is the distance between road and ride
-    lat_dist = road[index][1] - dot[1]
-    long_dist = road[index][0] - dot[0]
+    lat_dist = road.iloc[index].latitude - dot.latitude
+    long_dist = road.iloc[index].longitude - dot.longitude
     # get average distance between the two points
     full_lat_dist = lat_dist * counter
     full_long_dist = long_dist * counter
     avg_lat_dist = full_lat_dist / (counter + 1)
     avg_long_dist = full_long_dist / (counter + 1)
     # move the road to correct place
-    road[index][1] = road[index][1] - avg_lat_dist
-    road[index][0] = road[index][10] - avg_long_dist
-    return road[index]
+    road.iloc[index].latitude = road.iloc[index].latitude - avg_lat_dist
+    road.iloc[index].longitude = road.iloc[index].longitude - avg_long_dist
+    return road.iloc[index]

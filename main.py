@@ -96,18 +96,35 @@ if __name__ == "__main__":
     longitude_list2 = return_values_dict2['long_lat'][1]
 
     # plot data points + linear spline
+
+    # first method to calculate interpolation
+    print("---> inter1d: ")
     interp_func = math_functions.__get_linear_interpolation(latitude_list2, longitude_list2)
+    print("interp func type:", type(interp_func))
+    print("             X values: ", latitude_list2)
+    print("             Y values: ", interp_func(latitude_list2))
     math_functions.__plot_spline(latitude_list2, longitude_list2, interp_func)
 
+    # first method to calculate interpolation
+    print("---> UnivariateSpline: ")
+    univariate_spl_func = math_functions.__get_univariate_spline(latitude_list2, longitude_list2)
+    print("univariate_spl func type:", type(univariate_spl_func))
+    print("             X values: ", latitude_list2)
+    print("             Y values: ", univariate_spl_func(latitude_list2))
+    math_functions.__plot_spline(latitude_list2, longitude_list2, univariate_spl_func)
 
-    #### trace3
-    return_values_dict3 = process_pls(df_third_trace)
-    latitude_list3 = return_values_dict3['long_lat'][0]
-    longitude_list3 = return_values_dict3['long_lat'][1]
+    print("---> Comparison == ", interp_func(latitude_list2) == univariate_spl_func(latitude_list2))
 
-    # plot data points + linear spline
-    f = math_functions.__get_linear_interpolation(latitude_list3, longitude_list3)
-    # math_functions.__plot_spline(latitude_list3, longitude_list3, f)
+
+
+    # #### trace3
+    # return_values_dict3 = process_pls(df_third_trace)
+    # latitude_list3 = return_values_dict3['long_lat'][0]
+    # longitude_list3 = return_values_dict3['long_lat'][1]
+    #
+    # # plot data points + linear spline
+    # f = math_functions.__get_linear_interpolation(latitude_list3, longitude_list3)
+    # # math_functions.__plot_spline(latitude_list3, longitude_list3, f)
 
     # naming the x axis
     plt.xlabel('latitude - axis')
@@ -121,33 +138,38 @@ if __name__ == "__main__":
 
 
 
+#CENTER HOR & VER
+    # print("---> TRACE1: get center point")
+    # center = math_functions.__get_center_point_from_trace(df_segment)
+    # center_long = center['longitude'].to_numpy()
+    # center_lat = center['latitude'].to_numpy()
+    # print("CENTER longitude" , center_long)
+    # print("CENTER latitude" , center_lat)
+    # plt.plot(center_lat, center_long, marker = '*', color = 'red')
+    #
+    # print("---> get slope")
+    # center_points = center
+    #
+    # df = export_table.__extract_from_data_frame(df_segment, None, (center.index[0], center.index[0]+1))
+    # points_to_slope = export_table.__df_to_tuples(df)
+    # points_to_slope[0] = points_to_slope[0][1:]
+    # points_to_slope[1] = points_to_slope[1][1:]
+    # print(points_to_slope[0], points_to_slope[1])
+    # slope = math_functions.__get_slope_between_two_points(points_to_slope[0], points_to_slope[1])
+    # print(slope)
+    #
+    # print("---> get horizontal")
+    # math_functions.__plot_hor_graph(slope, points_to_slope[0])
+    #
+    # print("---> get vertical")
+    # vert_graph = math_functions.__plot_vert_graph(slope, points_to_slope[0])
 
-    print("---> TRACE1: get center point")
-    center = math_functions.__get_center_point_from_trace(df_segment)
-    center_long = center['longitude'].to_numpy()
-    center_lat = center['latitude'].to_numpy()
-    print("CENTER longitude" , center_long)
-    print("CENTER latitude" , center_lat)
-    plt.plot(center_lat, center_long, marker = '*', color = 'red')
+    # plt.show()
 
-    print("---> get slope")
-    center_points = center
 
-    df = export_table.__extract_from_data_frame(df_segment, None, (center.index[0], center.index[0]+1))
-    points_to_slope = export_table.__df_to_tuples(df)
-    points_to_slope[0] = points_to_slope[0][1:]
-    points_to_slope[1] = points_to_slope[1][1:]
-    print(points_to_slope[0], points_to_slope[1])
-    slope = math_functions.__get_slope_between_two_points(points_to_slope[0], points_to_slope[1])
-    print(slope)
 
-    print("---> get horizontal")
-    math_functions.__plot_hor_graph(slope, points_to_slope[0])
 
-    print("---> get vertical")
-    vert_graph = math_functions.__plot_vert_graph(slope, points_to_slope[0])
 
-    plt.show()
 
 
     # print("---> interpolate values")

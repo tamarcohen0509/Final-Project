@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import export_table
 from scipy.interpolate import interp1d
+from scipy.interpolate import UnivariateSpline
+
 
 
 # get the center point (long, lat) from an input dataframe
@@ -82,5 +84,12 @@ def __get_linear_interpolation(x, y):
     return f
 
 
+def __get_univariate_spline(x, y):
+    spl = UnivariateSpline(x, y)
+    return spl
+
+
 def __plot_spline(x, y, func):
     plt.plot(x, y, 'o', x, func(x), '-')    # plot data points + linear spline
+
+

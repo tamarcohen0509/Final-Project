@@ -3,7 +3,7 @@ import numpy as np
 import export_table
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
-
+import math
 
 
 # get the center point (long, lat) from an input dataframe
@@ -93,3 +93,6 @@ def __plot_spline(x, y, func):
     plt.plot(x, y, 'o', x, func(x), '-')    # plot data points + linear spline
 
 
+def __distance(p1, p2):
+    distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
+    return distance

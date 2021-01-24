@@ -26,6 +26,55 @@ def process_pls (df_trace):
     return_values_dict['segment'] = df_segment
     return return_values_dict
 
+
+def calculate_interp1d(latitude_list, longitude_list):
+    # first method to calculate interpolation
+    print("---> inter1d: ")
+    interp_func = math_functions.__get_linear_interpolation(latitude_list, longitude_list)
+    print("interp func type:", type(interp_func))
+    print("             X values: ", latitude_list)
+    print("             Y values: ", interp_func(latitude_list))
+    # plot the spline:
+    math_functions.__plot_spline(latitude_list, longitude_list, interp_func)
+    return interp_func
+
+
+def calculate_univariate_spl(latitude_list, longitude_list):
+    # first method to calculate interpolation
+    print("---> UnivariateSpline: ")
+    univariate_spl_func = math_functions.__get_univariate_spline(latitude_list, longitude_list)
+    print("univariate_spl func type:", type(univariate_spl_func))
+    print("             X values: ", latitude_list)
+    print("             Y values: ", univariate_spl_func(latitude_list))
+    # plot the spline:
+    math_functions.__plot_spline(latitude_list, longitude_list, univariate_spl_func)
+    return univariate_spl_func
+
+
+# move this function to add_drive
+def iterative_point_segment_comparison(point, df_segment):
+    print("POINT_TUPLE = ", point)
+    min_distance = 1000000  # initial value
+    # distances = []
+    for index, row in df_segment.iterrows():
+        row_lat = row['latitude']
+        row_long = row['longitude']
+        # print("ROW = ", (row_lat, row_long))
+        tmp_distance = math_functions.__distance(point, (row_lat, row_long))
+        # distances.append(tmp_distance)
+        if tmp_distance < min_distance:
+            min_distance = tmp_distance
+            min_index = index
+            min_row = (row_lat, row_long)
+
+    print("Minimum distance = ",  min_distance)
+    # print(min(distances))
+    print("INDEX = ", min_index)
+    print("POINT ON df = ", (min_row[0], min_row[1]))
+    plt.plot(min_row[0], min_row[1], marker = '*', color = 'purple')
+    return (min_distance, min_index)
+
+
 def f(x):
     '''
 
@@ -50,7 +99,7 @@ if __name__ == "__main__":
 
     print('========= plot all graphs')
     multiple_graphs = lambda gr: plt.plot(gr['longitude'], gr['latitude'])
-    export_table.__f_on_groupby(df_all, multiple_graphs, True)
+    # export_table.__f_on_groupby(df_all, multiple_graphs, True)
 
     # print('========= plot X graphs:')
     # graphs_names = ['17-06-13_WOB_City01_Passat_OV_loop11_lane1_130640_0.pls', '17-06-02_WOB_City01_Passat_OV_128800_0.pls']
@@ -94,44 +143,31 @@ if __name__ == "__main__":
     return_values_dict2 = process_pls(df_second_trace)
     latitude_list2 = return_values_dict2['long_lat'][0]
     longitude_list2 = return_values_dict2['long_lat'][1]
+    df_segment2 = return_values_dict2['segment']
+    export_table.__plot_data_points(latitude_list2, longitude_list2) # plotting the points
 
-    # plot data points + linear spline
-
-    # first method to calculate interpolation
-    print("---> inter1d: ")
-    interp_func = math_functions.__get_linear_interpolation(latitude_list2, longitude_list2)
-    print("interp func type:", type(interp_func))
-    print("             X values: ", latitude_list2)
-    print("             Y values: ", interp_func(latitude_list2))
-    math_functions.__plot_spline(latitude_list2, longitude_list2, interp_func)
-
-    # first method to calculate interpolation
-    print("---> UnivariateSpline: ")
-    univariate_spl_func = math_functions.__get_univariate_spline(latitude_list2, longitude_list2)
-    print("univariate_spl func type:", type(univariate_spl_func))
-    print("             X values: ", latitude_list2)
-    print("             Y values: ", univariate_spl_func(latitude_list2))
-    math_functions.__plot_spline(latitude_list2, longitude_list2, univariate_spl_func)
-
-    print("---> Comparison == ", interp_func(latitude_list2) == univariate_spl_func(latitude_list2))
+    # plot data points + linear spline - 2 methods
+    # calculate_interp1d(latitude_list2, longitude_list2)
+    # calculate_univariate_spl(latitude_list2, longitude_list2)
+    # print("---> Comparison == ", interp_func(latitude_list2) == univariate_spl_func(latitude_list2))
 
 
+    # Find the minuimum distance between point1 on road1 to road 2:
+    point1 = export_table.__extract_from_data_frame(df_segment, None, df_segment.index[20])
+    point1_long = point1['longitude'].to_numpy()
+    point1_lat = point1['latitude'].to_numpy()
+    print("POINT1 longitude" , point1_long)
+    print("POINT1 latitude" , point1_lat)
+    plt.plot(point1_lat, point1_long, marker = '*', color = 'red')
+    iterative_point_segment_comparison((point1_lat, point1_long), df_segment2)
 
-    # #### trace3
-    # return_values_dict3 = process_pls(df_third_trace)
-    # latitude_list3 = return_values_dict3['long_lat'][0]
-    # longitude_list3 = return_values_dict3['long_lat'][1]
-    #
-    # # plot data points + linear spline
-    # f = math_functions.__get_linear_interpolation(latitude_list3, longitude_list3)
-    # # math_functions.__plot_spline(latitude_list3, longitude_list3, f)
 
     # naming the x axis
     plt.xlabel('latitude - axis')
     # naming the y axis
     plt.ylabel('longitude - axis')
 
-
+    plt.show()
 
 
 

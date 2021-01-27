@@ -1,4 +1,7 @@
+import math_functions
 import pandas as pd
+import matplotlib.pyplot as plt
+counter = 0
 """
 input: traces
 output: roads that are a clustering of this
@@ -11,25 +14,40 @@ output: roads that are a clustering of this
 
 def create_streets(traces):
     roads = pd.DataFrame()
-    rides_cluster = pd.DataFrame()
-    for trace in traces:
-        trace = trace.assign(check=False)
-        trace = trace.assign(counter=0)
-        rides_cluster = rides_cluster.append(trace)
-    rides_to_cluster = rides_cluster[:]
-
-
-    rides = pd.DataFrame()
-    for ind, road in rides_to_cluster.iterrows():
-        rides_cluster = rides_to_cluster[:]
-        for ind, trace in rides_cluster.iterrows():
-
+    rides_to_cluster = traces[:]
+    i= 1
+    j= 0
+    for road in rides_to_cluster:
+        traces = rides_to_cluster[:]
+        for ind, dot in road.iterrows():
+            print("lals")
+            if road.iloc[ind].cluster is None:
+                print(j)
+                road.loc[ind, 'cluster'] = j
+                j= j+1
+        print(road)
+        for trace in traces:
+            if (trace is road):
+                continue
             unattached_segments, road = check_trace_relation(road, trace)
 
             #old_roads.append(road_old)
             rides = add_segments_to_list(trace, unattached_segments)
+
+            print("rides_to_cluster before remove")
+            print(rides_to_cluster)
+            print("rides_to_cluster before remove")
             rides_to_cluster.remove(trace)
+
+            print("rides_to_cluster after remove")
+            print(rides_to_cluster)
+            print("rides_to_cluster after remove")
+            rides = pd.DataFrame(rides)
             rides_to_cluster.append(rides)
+
+            print("rides_to_cluster after append")
+            print(rides_to_cluster)
+            print("rides_to_cluster after append")
         roads.append(road)
     return roads
 
@@ -60,17 +78,33 @@ a match with road
 
 def check_trace_relation(road, segment):
     width_trace = 10
+    segment = pd.DataFrame(segment)
+    if segment.empty:
+        print("no words in the segment")
+        return None, None
     for ind, dot in segment.iterrows():
-        index, distance = find_the_perfect_index(road, dot)
-        dot.check = add_dot_to_road(width_trace, distance)
-
-
-        if dot.check:
-            new_location = change_location(road, index, dot)
+        distance, index = find_the_perfect_index(road, (dot.latitude, dot.longitude))
+        print("index")
+        print(index)
+        segment.loc[ind,'check'] = add_dot_to_road(width_trace, distance)
+        if segment.loc[ind,'check']:
+            print("hereerere")
+            cluster = add_to_cluster(road, index, dot)
+            segment.loc[ind, 'cluster'] = cluster
+            #new_location = change_location(road, index, dot)
             #print(new_location)
-    segment_false = unchecked_segments(segment)
+    #segment_false = unchecked_segments(segment)
     return segment_false, road
 
+def add_to_cluster(road, index, dot):
+    if dot.cluster is not None:
+        print("dot has already a cluster it belongs to")
+        print(f"and it is {dot.loc['cluster']}")
+    else:
+        print(f"cluster to be put is {road.iloc[index].cluster}")
+        dot.loc['cluster'] = road.iloc[index].cluster
+        print(f"cluster inputted is {dot.loc['cluster']}")
+    return dot.loc['cluster']
 """
 This funcion runs on segmen an checks which dot are used 
 in roas and which were not clustered yet. 
@@ -98,9 +132,28 @@ def unchecked_segments(trace):
   which is closest to the place in spline 
   where the distance was measured from
 """#horizontal and vertical are regarding to the vertivcal beween dot and trace herefore not sure if need this recursive
-def find_the_perfect_index(main_trace, dot):
+def find_the_perfect_index(main_trace, dot):#point, df_segment):
+        min_distance = 1000000  # initial value
+        # distances = []
+        for index, row in main_trace.iterrows():
+            row_lat = row['latitude']
+            row_long = row['longitude']
+            # print("ROW = ", (row_lat, row_long))
+            tmp_distance = math_functions.__distance(dot, (row_lat, row_long))
+            # distances.append(tmp_distance)
+            if tmp_distance < min_distance:
+                min_distance = tmp_distance
+                min_index = index
+                min_row = (row_lat, row_long)
 
-    return 1, 1
+        print("Minimum distance = ", min_distance)
+        # print(min(distances))
+        print("INDEX = ", min_index)
+        print("POINT ON df = ", (min_row[0], min_row[1]))
+        plt.plot(min_row[0], min_row[1], marker='*', color='purple')
+        return (min_distance, min_index)
+
+
     #if index + 1 < main_trace.length:
     #    if main_trace[index].dist_horizontal(dot) > main_trace[index + 1].dist_horizontal(dot):
     #        main_trace.find_the_perfect_index(main_trace, dot, index + 1)
@@ -134,9 +187,10 @@ def change_location(road, index, dot):
     # is this road based on
     # print(road.iloc[index])
     # print(road.iloc[index].counter)
-
-    counter = road.iloc[index].counter
-    road.loc[index, 'counter'] = counter +1
+    #print(road.iloc[index])
+    index = int(index)
+    counter = road.iloc[index].counter + 1
+    road.loc[index, 'counter'] = counter
     #wha is the distance between road and ride
     lat_dist = road.iloc[index].latitude - dot.latitude
     long_dist = road.iloc[index].longitude - dot.longitude

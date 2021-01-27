@@ -4,10 +4,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import add_drive
 
-def process_pls (df_trace):
+def process_pls (df_trace, val):
     trace = df_trace[['pls_name', 'longitude', 'latitude', 'altitude', 's']].copy()
     trace_copy = df_trace[['pls_name', 'longitude', 'latitude', 'altitude', 's']].copy()
-    df_segment = trace[(trace_copy['s'] < 10)]
+    if val is 1:
+        df_segment = trace[(trace_copy['s'] < 3)]
+    if val is 2:
+        df_segment = trace[(trace_copy['s']>7) & (trace_copy['s']<10)]
 
     # export_table.__p_data_frame(df_segment, None)     # print data frame values
     # export_table.__plot_graph(df_segment)             # plotting
@@ -51,25 +54,36 @@ if __name__ == "__main__":
     df_second_trace = df_second_trace.loc[df_second_trace['pls_name'] == pls_names_list[1]]
 
     #### trace1
-    return_values_dict = process_pls(df_first_trace)
+    return_values_dict = process_pls(df_first_trace, 1)
     latitude_list = return_values_dict['long_lat'][0]
     longitude_list = return_values_dict['long_lat'][1]
     df_segment = return_values_dict['segment']
+
+    df_segment = df_segment.assign(check=False)
+    df_segment = df_segment.assign(counter=0)
+
+    df_segment = df_segment.assign(cluster=None)
+    print(df_segment)
     export_table.__plot_data_points(latitude_list, longitude_list)  # plotting the points
 
 
     #### trace2
-    return_values_dict2 = process_pls(df_second_trace)
+    return_values_dict2 = process_pls(df_second_trace, 2)
     latitude_list2 = return_values_dict2['long_lat'][0]
     longitude_list2 = return_values_dict2['long_lat'][1]
 
+
     df_segment2 = return_values_dict2['segment']
+    df_segment2 = df_segment2.assign(check=False)
+    df_segment2 = df_segment2.assign(counter=0)
+    df_segment2 = df_segment2.assign(cluster=None)
+    print(df_segment2)
     export_table.__plot_data_points(latitude_list2, longitude_list2, color='#C60B4B', m_color='#C60B50')  # plotting the points
 
     plt.show()
     road = add_drive.create_streets([df_segment, df_segment2])
     print(road)
-    return_values_dict2 = process_pls(road)
+    return_values_dict2 = process_pls(road , 0)
     latitude_list2 = return_values_dict2['long_lat'][0]
     longitude_list2 = return_values_dict2['long_lat'][1]
     export_table.__plot_data_points(latitude_list2, longitude_list2, color='#C70B4B',

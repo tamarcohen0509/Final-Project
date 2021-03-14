@@ -29,7 +29,7 @@ def process_pls (df_trace, val):
 if __name__ == "__main__":
     # open HDF file
     pd.set_option('max_colwidth', 40)
-    hdf_table = pd.read_hdf(r"C:\Users\H&M\Documents\porject_end_degree\test_to_start/WOB.hdf")
+    hdf_table = pd.read_hdf(r"C:\Users\tamarcoh\FinalProject\HDF files\GPS traces\WOB.hdf")
     export_table.__p_type(hdf_table)  # print columns type
 
     df_all = pd.DataFrame(data=hdf_table)
@@ -80,13 +80,13 @@ if __name__ == "__main__":
     print(df_segment2)
     export_table.__plot_data_points(latitude_list2, longitude_list2, color='#C60B4B', m_color='#C60B50')  # plotting the points
 
-    plt.show()
+    # plt.show()
     road = add_drive.create_streets([df_segment, df_segment2])
-    print(road)
-    return_values_dict2 = process_pls(road , 0)
-    latitude_list2 = return_values_dict2['long_lat'][0]
-    longitude_list2 = return_values_dict2['long_lat'][1]
-    export_table.__plot_data_points(latitude_list2, longitude_list2, color='#C70B4B',
-                                    m_color='#C62B50')  # plotting the points
-    plt.show()
+    # print(road)
+    # return_values_dict2 = process_pls(road , 0)
+    # latitude_list2 = return_values_dict2['long_lat'][0]
+    # longitude_list2 = return_values_dict2['long_lat'][1]
+    # export_table.__plot_data_points(latitude_list2, longitude_list2, color='#C70B4B',
+    #                                 m_color='#C62B50')  # plotting the points
+    # plt.show()
 

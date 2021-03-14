@@ -8,9 +8,11 @@ def process_pls (df_trace, val):
     trace = df_trace[['pls_name', 'longitude', 'latitude', 'altitude', 's']].copy()
     trace_copy = df_trace[['pls_name', 'longitude', 'latitude', 'altitude', 's']].copy()
     if val is 1:
-        df_segment = trace[(trace_copy['s'] < 3)]
+        # df_segment = trace[(trace_copy['s'] < 3)]
+        df_segment = trace[(trace_copy['s'] < 20)]
     if val is 2:
-        df_segment = trace[(trace_copy['s']>7) & (trace_copy['s']<10)]
+        # df_segment = trace[(trace_copy['s']>7) & (trace_copy['s']<10)]
+        df_segment = trace[(trace_copy['s']<20)]
 
     # export_table.__p_data_frame(df_segment, None)     # print data frame values
     # export_table.__plot_graph(df_segment)             # plotting

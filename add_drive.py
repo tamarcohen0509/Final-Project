@@ -84,7 +84,7 @@ a match with road
 """
 def check_trace_relation(road, segment):
     print("\n\n---> IN check_trace_relation")
-    width_trace = 10
+    width_trace = 0.00002
     segment = pd.DataFrame(segment)
     if segment.empty: #??
         print("no words in the segment")

@@ -3,6 +3,8 @@ import numpy as np
 import export_table
 from scipy.interpolate import interp1d
 import math
+import pyproj
+import functools
 
 
 # get the center point (long, lat) from an input dataframe
@@ -40,12 +42,14 @@ def __get_y_axis_based_on_slope(point1, x_axis, slope):
     y = slope*x_axis + n
     return y
 
+
 def __plot_hor_graph(slope, point1):
     x = np.linspace(point1[1] - 0.001, point1[1] + 0.001, 5)
     n = point1[0] - (slope * point1[1])
     y = slope * x + n
     plt.plot(x, y, '-r', color = 'black')
     return y
+
 
 def __plot_vert_graph(slope, point1):
     r_slope = __get_reciprocal_slope(slope)
@@ -86,6 +90,44 @@ def __get_linear_interpolation(x, y):
 def __plot_spline(x, y, func):
     plt.plot(x, y, 'o', x, func(x), '-')    # plot data points + linear spline
 
+
 def __distance(p1, p2):
     distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
     return distance
+
+
+def __gps_to_ecef(lat, lon, alt):
+    ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
+    lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
+    x, y, z = pyproj.transform(lla, ecef, lon, lat, alt, radians=False)
+    return x,y,z
+
+
+def __ecef_to_gps(x, y, z):
+    transformer = pyproj.Transformer.from_crs(
+        {"proj": 'geocent', "ellps": 'WGS84', "datum": 'WGS84'},
+        {"proj": 'latlong', "ellps": 'WGS84', "datum": 'WGS84'},
+    )
+    lon, lat, alt = transformer.transform(x, y, z, radians=False)
+    return lat, lon, alt
+
+
+def __get_cartesian_avg_point(points, n):
+    sum_x = sum(i for i, j, k in points)
+    sum_y = sum(j for i, j, k in points)
+    sum_z = sum(k for i, j, k in points)
+    return sum_x/n, sum_y/n, sum_z/n
+
+def __get_avg_point(cluster_list):
+    num_of_elemnts = len(cluster_list)
+    cartesian_points = []
+    for geo_dot in cluster_list:
+        cartesian_points.append(__gps_to_ecef(geo_dot[0], geo_dot[1], geo_dot[2]))
+    print("cartesian_points: ", cartesian_points)
+    cartesian_avg = __get_cartesian_avg_point(cartesian_points, num_of_elemnts)
+    print("cartesian_avg: ", cartesian_avg)
+    geo_avg_point = __ecef_to_gps(cartesian_avg[0], cartesian_avg[1], cartesian_avg[2])
+    print("geo_avg_point: ", geo_avg_point)
+    return geo_avg_point
+
+

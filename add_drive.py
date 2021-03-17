@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 counter = 0
 clusters = {}
+
 """
 input: traces
 output: roads that are a clustering of this
@@ -13,7 +14,6 @@ output: roads that are a clustering of this
     would get clusters which are group of all dots that are connected.
     the clustes aren't on the original traces it's on the common parts of the traces.
 """
-
 def create_streets(traces):
     print("\n\n---> IN create_streets:")
     # print(traces)
@@ -37,6 +37,12 @@ def create_streets(traces):
             check_trace_relation(road, trace)
             # print("====== clusters: ", clusters)
             plot_cluster()
+            # print(list(clusters.values())[12])
+            # avg_point = merge_points_in_clusters(list(clusters.values())[12])
+            # export_table.__plot_data_points(avg_point[0], avg_point[1], color='#000000', m_color='#000000', marker='X')
+            merge_points_in_clusters()
+            plt.show()  #######TODO: open it!
+
         #     #old_roads.append(road_old)
         #     rides = add_segments_to_list(trace, unattached_segments)
         #
@@ -164,15 +170,6 @@ def find_the_perfect_index(main_trace, dot):#point, df_segment):
         # plt.plot(min_row[0], min_row[1], marker='*', color='red')
         return (min_distance, min_index)
 
-
-    #if index + 1 < main_trace.length:
-    #    if main_trace[index].dist_horizontal(dot) > main_trace[index + 1].dist_horizontal(dot):
-    #        main_trace.find_the_perfect_index(main_trace, dot, index + 1)
-    #if index - 1 >= 0:
-    #    if main_trace[index].dist_horizontal(dot) > main_trace[index - 1].dist_horizontal(dot):
-    #        main_trace.find_the_perfect_index(main_trace, dot, index - 1)
-    #return index
-
 """
 This function adds a given dot to a road if it matches-
 if the distance is smaller then the width of the street.
@@ -223,5 +220,29 @@ def plot_cluster():
                 print(val['cluster'])
                 # export_table.__plot_data_points(val['latitude'], val['longitude'], color=(0.1+i, 0.1+i, 0.5), m_color=(0.1+i, 0.1+i, 0.5))
                 export_table.__plot_data_points(val['latitude'], val['longitude'], color=rgb, m_color=rgb)
-    plt.show()
         # break
+
+"""
+merge the points in an input cluster to one point
+using geometric avg. this will give us one road
+"""
+def merge_points_in_cluster(cluster):
+    cluster_list = []
+    for point in cluster:
+        point_lat = point['latitude']
+        point_long = point['longitude']
+        point_alt = point['altitude']
+        cluster_list.append((point_lat, point_long, point_alt))
+    print(cluster_list)
+    avg_point = math_functions.__get_avg_point(cluster_list)
+    return avg_point
+
+
+def merge_points_in_clusters():
+    avg_points = []
+    for cluster in clusters.values():
+        if len(cluster) < 2:
+            continue
+        avg_point = merge_points_in_cluster(cluster)
+        avg_points.append(avg_point)
+        export_table.__plot_data_points(avg_point[0], avg_point[1], color='#000000', m_color='#000000', marker='X')

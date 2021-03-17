@@ -80,7 +80,7 @@ if __name__ == "__main__":
     df_segment2 = df_segment2.assign(counter=0)
     df_segment2 = df_segment2.assign(cluster=None)
     print(df_segment2)
-    export_table.__plot_data_points(latitude_list2, longitude_list2, color='#C60B4B', m_color='#C60B50')  # plotting the points
+    export_table.__plot_data_points(latitude_list2, longitude_list2, color='#000000', m_color='#C60B50')  # plotting the points
 
     # plt.show()
     road = add_drive.create_streets([df_segment, df_segment2])

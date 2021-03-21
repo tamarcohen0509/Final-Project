@@ -26,8 +26,10 @@ def create_streets(traces):
             if road.iloc[ind].cluster is None: # if the dot does not belong to any road
                 j += 1
                 road.loc[ind, 'cluster'] = j
-                clusters[j] = [] # create a new cluster key in clusters dict
-                clusters[j].append(road.iloc[ind])
+                # create a new cluster key in clusters dict
+                clusters[j] = {dot['pls_name']:[road.iloc[ind]]}  #####change 21/03
+                # clusters[j] = []
+                # clusters[j].append(road.iloc[ind])
         # print(road)
 
         for trace in traces:
@@ -106,7 +108,10 @@ def check_trace_relation(road, segment):
             cluster = add_to_cluster(road, index, dot)  #############????
             segment.loc[ind, 'cluster'] = cluster
             print("cluster ", cluster)
-            clusters[cluster].append(dot)
+            clusters[cluster].setdefault(dot['pls_name'], []).append(dot)  #####change 21/03
+            # clusters[cluster].append(dot)
+            print("---->>>HERE", clusters)
+
             #new_location = change_location(road, index, dot)
             #print(new_location)
     #segment_false = unchecked_segments(segment)
@@ -210,38 +215,57 @@ def change_location(road, index, dot):
 
 
 def plot_cluster():
-    i = 0
     for key, values in clusters.items():
         print("----------->key #", key, ": \n")
         rgb = np.random.rand(3, )  # generate a random color
-        # i += 0.05
         if len(values) > 1:
-            for val in values:
-                print(val['cluster'])
-                # export_table.__plot_data_points(val['latitude'], val['longitude'], color=(0.1+i, 0.1+i, 0.5), m_color=(0.1+i, 0.1+i, 0.5))
-                export_table.__plot_data_points(val['latitude'], val['longitude'], color=rgb, m_color=rgb)
-        # break
+            for key, dots in values.items():
+                for dot in dots:
+                    print("DOT = ", dot['pls_name'])
+                    export_table.__plot_data_points(dot['latitude'], dot['longitude'], color=rgb, m_color=rgb)
+
+
+def get_avg_in_pls(pls):
+    points = []
+    for point in pls:
+        point_lat = point['latitude']
+        point_long = point['longitude']
+        point_alt = point['altitude']
+        points.append((point_lat, point_long, point_alt))
+    avg_point = math_functions.__get_avg_point(points)
+    return avg_point
+
 
 """
 merge the points in an input cluster to one point
 using geometric avg. this will give us one road
 """
 def merge_points_in_cluster(cluster):
+    print("\n\nCLUSTER IS: ", cluster)
     cluster_list = []
-    for point in cluster:
-        point_lat = point['latitude']
-        point_long = point['longitude']
-        point_alt = point['altitude']
-        cluster_list.append((point_lat, point_long, point_alt))
+    for pls in cluster:
+        if len(cluster[pls]) > 1:
+            point_to_add = get_avg_in_pls(cluster[pls])
+            print("AVG_PLS: ", point)
+            # append
+        else:
+            point = cluster[pls][0]
+            point_lat = point['latitude']
+            point_long = point['longitude']
+            point_alt = point['altitude']
+            point_to_add = (point_lat, point_long, point_alt)
+        cluster_list.append(point_to_add)
     print(cluster_list)
     avg_point = math_functions.__get_avg_point(cluster_list)
     return avg_point
 
 
 def merge_points_in_clusters():
+    # get_avg_in_pls()    #calculate the avg point in every pls in cluster
     avg_points = []
     for cluster in clusters.values():
         if len(cluster) < 2:
+        # if len(cluster) != 2:
             continue
         avg_point = merge_points_in_cluster(cluster)
         avg_points.append(avg_point)

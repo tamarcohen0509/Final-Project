@@ -1,7 +1,11 @@
-import math_functions
+import math_functions, export_table
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 counter = 0
+order_counter = 0
+clusters = {}
+order = {}
 """
 input: traces
 output: roads that are a clustering of this
@@ -13,44 +17,59 @@ output: roads that are a clustering of this
 """
 
 def create_streets(traces):
+    print("\n\n---> IN create_streets:")
+    # print(traces)
     roads = pd.DataFrame()
     rides_to_cluster = traces[:]
-    i= 1
-    j= 0
+    j = 0
     for road in rides_to_cluster:
-        traces = rides_to_cluster[:]
+        # this loop creates a new cluster for each dot that does not belong to any
         for ind, dot in road.iterrows():
-            print("lals")
-            if road.iloc[ind].cluster is None:
-                print(j)
+            if road.iloc[ind].cluster is None: # if the dot does not belong to any road
+                j += 1
                 road.loc[ind, 'cluster'] = j
-                j= j+1
-        print(road)
+                clusters[j] = [] # create a new cluster key in clusters dict
+                clusters[j].append(road.iloc[ind])
+        # print(road)
+
         for trace in traces:
-            if (trace is road):
+            if (trace is road): #if the trace is the main road which is the original
                 continue
-            unattached_segments, road = check_trace_relation(road, trace)
-
-            #old_roads.append(road_old)
-            rides = add_segments_to_list(trace, unattached_segments)
-
-            print("rides_to_cluster before remove")
-            print(rides_to_cluster)
-            print("rides_to_cluster before remove")
-            rides_to_cluster.remove(trace)
-
-            print("rides_to_cluster after remove")
-            print(rides_to_cluster)
-            print("rides_to_cluster after remove")
-            rides = pd.DataFrame(rides)
-            rides_to_cluster.append(rides)
-
-            print("rides_to_cluster after append")
-            print(rides_to_cluster)
-            print("rides_to_cluster after append")
-        roads.append(road)
+            # unattached_segments, road = check_trace_relation(road, trace) # error here: TypeError: cannot unpack non-iterable NoneType object
+            check_trace_relation(road, trace)
+            # print("====== clusters: ", clusters)
+            plot_cluster()
+            #lign_clusters()
+        #     #old_roads.append(road_old)
+        #     rides = add_segments_to_list(trace, unattached_segments)
+        #
+        #     print("rides_to_cluster before remove")
+        #     print(rides_to_cluster)
+        #     print("rides_to_cluster before remove")
+        #     rides_to_cluster.remove(trace)
+        #
+        #     print("rides_to_cluster after remove")
+        #     print(rides_to_cluster)
+        #     print("rides_to_cluster after remove")
+        #     rides = pd.DataFrame(rides)
+        #     rides_to_cluster.append(rides)
+        #
+        #     print("rides_to_cluster after append")
+        #     print(rides_to_cluster)
+        #     print("rides_to_cluster after append")
+        # roads.append(road)
     return roads
+# """
+# This function sorts out clusters to be in th order of a street
+# """
+# def lign_clusters():
+#     for key, values in clusters.items():
+#         if order is None:
+#             order[0] = key
+#         else:
+            
 
+    return None
 """
 input: trace and a list of tuples of index's where the trace
        wasn't matched to any road.
@@ -68,6 +87,7 @@ def add_segments_to_list(trace, unattached_segments):
         new_seg = trace[start_seg:end_seg]
         rides.append(new_seg)
     return rides
+
 """
 This function gets a road and a segment.
 it returns he new road according to the 
@@ -75,28 +95,33 @@ avg with the right points in trace and returns
 a list with tuples of index's where trace wasn't
 a match with road
 """
-
 def check_trace_relation(road, segment):
-    width_trace = 10
+    print("\n\n---> IN check_trace_relation")
+    width_trace = 0.00002
     segment = pd.DataFrame(segment)
-    if segment.empty:
+    if segment.empty: #??
         print("no words in the segment")
         return None, None
     for ind, dot in segment.iterrows():
+        # print("IN LOOP: ind = ", ind)
         distance, index = find_the_perfect_index(road, (dot.latitude, dot.longitude))
-        print("index")
-        print(index)
-        segment.loc[ind,'check'] = add_dot_to_road(width_trace, distance)
+        # print("find_the_perfect_index: MIN_distance = ", distance, "index = ", index)
+        segment.loc[ind,'check'] = add_dot_to_road(width_trace, distance) #belong dot only if it is in the road width
+
+
         if segment.loc[ind,'check']:
-            print("hereerere")
-            cluster = add_to_cluster(road, index, dot)
+            cluster = add_to_cluster(road, index, dot)  #############????
             segment.loc[ind, 'cluster'] = cluster
+            print("cluster ", cluster)
+            clusters[cluster].append(dot)
             #new_location = change_location(road, index, dot)
             #print(new_location)
     #segment_false = unchecked_segments(segment)
-    return segment_false, road
+    # return segment_false, road
+
 
 def add_to_cluster(road, index, dot):
+    print("\n\n---> IN add_to_cluster")
     if dot.cluster is not None:
         print("dot has already a cluster it belongs to")
         print(f"and it is {dot.loc['cluster']}")
@@ -105,6 +130,7 @@ def add_to_cluster(road, index, dot):
         dot.loc['cluster'] = road.iloc[index].cluster
         print(f"cluster inputted is {dot.loc['cluster']}")
     return dot.loc['cluster']
+
 """
 This funcion runs on segmen an checks which dot are used 
 in roas and which were not clustered yet. 
@@ -138,7 +164,6 @@ def find_the_perfect_index(main_trace, dot):#point, df_segment):
         for index, row in main_trace.iterrows():
             row_lat = row['latitude']
             row_long = row['longitude']
-            # print("ROW = ", (row_lat, row_long))
             tmp_distance = math_functions.__distance(dot, (row_lat, row_long))
             # distances.append(tmp_distance)
             if tmp_distance < min_distance:
@@ -146,11 +171,10 @@ def find_the_perfect_index(main_trace, dot):#point, df_segment):
                 min_index = index
                 min_row = (row_lat, row_long)
 
-        print("Minimum distance = ", min_distance)
-        # print(min(distances))
-        print("INDEX = ", min_index)
-        print("POINT ON df = ", (min_row[0], min_row[1]))
-        plt.plot(min_row[0], min_row[1], marker='*', color='purple')
+        # print("Minimum distance = ", min_distance)
+        # print("INDEX = ", min_index)
+        # print("POINT ON df = ", (min_row[0], min_row[1]))
+        # plt.plot(min_row[0], min_row[1], marker='*', color='red')
         return (min_distance, min_index)
 
 
@@ -167,8 +191,8 @@ This function adds a given dot to a road if it matches-
 if the distance is smaller then the width of the street.
 """
 def add_dot_to_road(width_street, distance):
-    if distance < 0:
-        temp_dist =distance * (-1)
+    if distance < 0: #???
+        temp_dist = distance * (-1)
     else:
         temp_dist = distance
     if temp_dist < width_street:
@@ -183,11 +207,7 @@ so this dot should be located on the vertical in an
 average depending on how many traces is main road based on
 """
 def change_location(road, index, dot):
-    #counter counts how many rides
-    # is this road based on
-    # print(road.iloc[index])
-    # print(road.iloc[index].counter)
-    #print(road.iloc[index])
+    #counter counts how many rides is this road based on
     index = int(index)
     counter = road.iloc[index].counter + 1
     road.loc[index, 'counter'] = counter
@@ -203,3 +223,19 @@ def change_location(road, index, dot):
     road.iloc[index].latitude = road.iloc[index].latitude - avg_lat_dist
     road.iloc[index].longitude = road.iloc[index].longitude - avg_long_dist
     return road.iloc[index]
+
+
+def plot_cluster():
+    i = 0
+    for key, values in clusters.items():
+        print("----------->key #", key, ": \n")
+        rgb = np.random.rand(3, )  # generate a random color
+        # i += 0.05
+        print(values)
+        if len(values) > 1:
+            for val in values:
+                print(val['cluster'])
+                # export_table.__plot_data_points(val['latitude'], val['longitude'], color=(0.1+i, 0.1+i, 0.5), m_color=(0.1+i, 0.1+i, 0.5))
+                export_table.__plot_data_points(val['latitude'], val['longitude'], color=rgb, m_color=rgb)
+    plt.show()
+        # break

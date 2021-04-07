@@ -15,47 +15,26 @@ output: roads that are a clustering of this
     the clustes aren't on the original traces it's on the common parts of the traces.
 """
 def create_streets(traces):
-   # print("\n\n---> IN create_streets:")
-    # print(traces)
     roads = pd.DataFrame()
     rides_to_cluster = traces[:]
     j = 0
-    first_index_road =0
     for road in rides_to_cluster:
         # this loop creates a new cluster for each dot that does not belong to any
         print(road)
-        first_index_road = road.iloc[0].name
-        print("first_index_road")
-        print(first_index_road)
-        print("first_index_road")
         for ind, dot in road.iterrows():
-            # print("ind", ind)
-            # print("dot", dot)
-            # print("road.iloc[ind].cluster")
-            # print(road.iloc[ind].cluster)
-            # print("road.iloc[ind].cluster")
-            #if road.iloc[ind - first_index_road].cluster is None: # if the dot does not belong to any road
             if road.loc[ind].cluster is None: # if the dot does not belong to any road
                 j += 1
                 road.loc[ind, 'cluster'] = j
                 # create a new cluster key in clusters dict
-                clusters[j] = {dot['pls_name']:[road.loc[ind]]}  #####change 21/03
-                # clusters[j] = []
-                # clusters[j].append(road.iloc[ind])
-        # print(road)
+                clusters[j] = {dot['pls_name']:[road.loc[ind]]}
 
         for trace in traces:
             if (trace is road): #if the trace is the main road which is the original
                 continue
-            # unattached_segments, road = check_trace_relation(road, trace) # error here: TypeError: cannot unpack non-iterable NoneType object
             check_trace_relation(road, trace)
-            # print("====== clusters: ", clusters)
             plot_cluster()
-            # print(list(clusters.values())[12])
-            # avg_point = merge_points_in_clusters(list(clusters.values())[12])
-            # export_table.__plot_data_points(avg_point[0], avg_point[1], color='#000000', m_color='#000000', marker='X')
             merge_points_in_clusters()
-            plt.show()  #######TODO: open it!
+            plt.show()
     return roads
 
 """
@@ -68,7 +47,6 @@ def add_segments_to_list(trace, unattached_segments):
     if unattached_segments is None:
         return None
     rides = []
-    #values = unattached_segments.split("(")
     for value in unattached_segments:
         start_seg = value[0]
         end_seg = value[1]
@@ -84,42 +62,27 @@ a list with tuples of index's where trace wasn't
 a match with road
 """
 def check_trace_relation(road, segment):
-    #print("\n\n---> IN check_trace_relation")
     width_trace = 0.1
     segment = pd.DataFrame(segment)
-    if segment.empty: #??
-       # print("no words in the segment")
+    if segment.empty:
         return None, None
     for ind, dot in segment.iterrows():
-        # print("IN LOOP: ind = ", ind)
         distance, index = find_the_perfect_index(road, (dot.latitude, dot.longitude))
-        # print("find_the_perfect_index: MIN_distance = ", distance, "index = ", index)
         segment.loc[ind,'check'] = add_dot_to_road(width_trace, distance) #belong dot only if it is in the road width
 
 
         if segment.loc[ind,'check']:
-            cluster = add_to_cluster(road, index, dot)  #############????
+            cluster = add_to_cluster(road, index, dot)
             segment.loc[ind, 'cluster'] = cluster
-            #print("cluster ", cluster)
-            clusters[cluster].setdefault(dot['pls_name'], []).append(dot)  #####change 21/03
-            # clusters[cluster].append(dot)
-            #print("---->>>HERE", clusters)
+            clusters[cluster].setdefault(dot['pls_name'], []).append(dot)
 
-            #new_location = change_location(road, index, dot)
-            #print(new_location)
-    #segment_false = unchecked_segments(segment)
-    # return segment_false, road
 
 
 def add_to_cluster(road, index, dot):
- #   print("\n\n---> IN add_to_cluster")
     if dot.cluster is not None:
         print("dot has already a cluster it belongs to")
-        #print(f"and it is {dot.loc['cluster']}")
     else:
-        #print(f"cluster to be put is {road.iloc[index].cluster}")
         dot.loc['cluster'] = road.loc[index].cluster
-        #print(f"cluster inputted is {dot.loc['cluster']}")
     return dot.loc['cluster']
 
 """
@@ -151,21 +114,14 @@ def unchecked_segments(trace):
 """#horizontal and vertical are regarding to the vertivcal beween dot and trace herefore not sure if need this recursive
 def find_the_perfect_index(main_trace, dot):#point, df_segment):
         min_distance = 1000000  # initial value
-        # distances = []
         for index, row in main_trace.iterrows():
             row_lat = row['latitude']
             row_long = row['longitude']
             tmp_distance = math_functions.__distance(dot, (row_lat, row_long))
-            # distances.append(tmp_distance)
             if tmp_distance < min_distance:
                 min_distance = tmp_distance
                 min_index = index
-                min_row = (row_lat, row_long)
 
-        # print("Minimum distance = ", min_distance)
-        # print("INDEX = ", min_index)
-        # print("POINT ON df = ", (min_row[0], min_row[1]))
-        # plt.plot(min_row[0], min_row[1], marker='*', color='red')
         return (min_distance, min_index)
 
 """
@@ -209,12 +165,10 @@ def change_location(road, index, dot):
 
 def plot_cluster():
     for key, values in clusters.items():
-        #print("----------->key #", key, ": \n")
         rgb = np.random.rand(3, )  # generate a random color
         if len(values) > 1:
             for key, dots in values.items():
                 for dot in dots:
-                    #print("DOT = ", dot['pls_name'])
                     export_table.__plot_data_points(dot['latitude'], dot['longitude'], color=rgb, m_color=rgb)
 
 
@@ -234,13 +188,10 @@ merge the points in an input cluster to one point
 using geometric avg. this will give us one road
 """
 def merge_points_in_cluster(cluster):
-    #print("\n\nCLUSTER IS: ", cluster)
     cluster_list = []
     for pls in cluster:
         if len(cluster[pls]) > 1:
             point_to_add = get_avg_in_pls(cluster[pls])
-            #print("AVG_PLS: ", point)
-            # append
         else:
             point = cluster[pls][0]
             point_lat = point['latitude']
@@ -248,17 +199,14 @@ def merge_points_in_cluster(cluster):
             point_alt = point['altitude']
             point_to_add = (point_lat, point_long, point_alt)
         cluster_list.append(point_to_add)
-    #print(cluster_list)
     avg_point = math_functions.__get_avg_point(cluster_list)
     return avg_point
 
 
 def merge_points_in_clusters():
-    # get_avg_in_pls()    #calculate the avg point in every pls in cluster
     avg_points = []
     for cluster in clusters.values():
         if len(cluster) < 2:
-        # if len(cluster) != 2:
             continue
         avg_point = merge_points_in_cluster(cluster)
         avg_points.append(avg_point)

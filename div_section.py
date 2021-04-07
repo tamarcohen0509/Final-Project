@@ -1,6 +1,4 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import export_table
 
 def __avg_speed(data_frame, index):
     data_frame.mean(axis=0, skipna=True)
@@ -16,6 +14,4 @@ if __name__ == "__main__":
     df_sec_trace = df.loc[df['pls_name'] == graph2]
 
     print(df_first_trace['speed'].index(range(0,1000)))
-    # avg_speed = __avg_speed(df_first_trace['speed'].max_index(1000), list(range(0,1000)))
-    # print(avg_speed)
 

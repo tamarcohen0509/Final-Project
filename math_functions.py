@@ -3,6 +3,7 @@ import numpy as np
 import export_table
 from scipy.interpolate import interp1d
 import math
+import pyproj
 
 
 # get the center point (long, lat) from an input dataframe
@@ -40,6 +41,7 @@ def __get_y_axis_based_on_slope(point1, x_axis, slope):
     y = slope*x_axis + n
     return y
 
+
 def __plot_hor_graph(slope, point1):
     x = np.linspace(point1[1] - 0.001, point1[1] + 0.001, 5)
     n = point1[0] - (slope * point1[1])
@@ -47,30 +49,13 @@ def __plot_hor_graph(slope, point1):
     plt.plot(x, y, '-r', color = 'black')
     return y
 
+
 def __plot_vert_graph(slope, point1):
     r_slope = __get_reciprocal_slope(slope)
     point2 = [0,0]
     # point3 = [0,0]
     point2[1] = point1[1] -0.001 # latitude value
     point2[0] = __get_y_axis_based_on_slope(point1, point2[1], r_slope)
-    point2 = tuple(point2)
-
-    # point3[1] = point1[1] + 0.1  # latitude value
-    # point3[0] = __get_y_axis_based_on_slope(point1, point3[1], r_slope)
-    # point3 = tuple(point3)
-
-    # print(point2)
-
-    # y_values = [point1[0], point2[0], point3[0]]
-    # x_values = [point1[1], point2[1], point3[0]]
-
-    # y_values = [point1[0], point2[0]]
-    # x_values = [point1[1], point2[1]]
-    #
-    # print(x_values, y_values)
-
-    # plt.plot(x_values, y_values, color='red')
-    # plt.axline((0, 0.5), slope=0.25, color="black", linestyle=(0, (5, 5)))
     x = np.linspace(point1[1]-0.001, point1[1]+0.001, 5)
     n = point1[0] - (r_slope * point1[1])
     y = r_slope * x + n
@@ -86,6 +71,41 @@ def __get_linear_interpolation(x, y):
 def __plot_spline(x, y, func):
     plt.plot(x, y, 'o', x, func(x), '-')    # plot data points + linear spline
 
+
 def __distance(p1, p2):
     distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
     return distance
+
+
+def __gps_to_ecef(lat, lon, alt):
+    ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
+    lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
+    x, y, z = pyproj.transform(lla, ecef, lon, lat, alt, radians=False)
+    return x,y,z
+
+
+def __ecef_to_gps(x, y, z):
+    transformer = pyproj.Transformer.from_crs(
+        {"proj": 'geocent', "ellps": 'WGS84', "datum": 'WGS84'},
+        {"proj": 'latlong', "ellps": 'WGS84', "datum": 'WGS84'},
+    )
+    lon, lat, alt = transformer.transform(x, y, z, radians=False)
+    return lat, lon, alt
+
+
+def __get_cartesian_avg_point(points, n):
+    sum_x = sum(i for i, j, k in points)
+    sum_y = sum(j for i, j, k in points)
+    sum_z = sum(k for i, j, k in points)
+    return sum_x/n, sum_y/n, sum_z/n
+
+def __get_avg_point(cluster_list):
+    num_of_elemnts = len(cluster_list)
+    cartesian_points = []
+    for geo_dot in cluster_list:
+        cartesian_points.append(__gps_to_ecef(geo_dot[0], geo_dot[1], geo_dot[2]))
+    cartesian_avg = __get_cartesian_avg_point(cartesian_points, num_of_elemnts)
+    geo_avg_point = __ecef_to_gps(cartesian_avg[0], cartesian_avg[1], cartesian_avg[2])
+    return geo_avg_point
+
+

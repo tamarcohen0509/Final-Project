@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import pandas as pd
 from geopy import distance
 
 
